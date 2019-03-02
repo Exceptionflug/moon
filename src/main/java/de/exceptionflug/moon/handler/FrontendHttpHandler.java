@@ -37,9 +37,10 @@ public class FrontendHttpHandler extends FormDataHandler {
         AbstractResponse response = webApplication.getResponse(requestURI);
         if(response instanceof DirectoryResponse) {
             try {
-                final AbstractResponse index = webApplication.getResponse(new URIBuilder(requestURI).setPath(requestURI.getPath()+"/index.html").build());
+                final URI build = new URIBuilder(requestURI).setPath(requestURI.getPath() + "/index.html").build();
+                final AbstractResponse index = webApplication.getResponse(build);
                 if(!(index instanceof NotFoundResponse))
-                    response = index;
+                    new Request(httpExchange, cookies, null).rewriteLocation(build.toASCIIString());
             } catch (final URISyntaxException e) {
             } // Won't happen
         }
