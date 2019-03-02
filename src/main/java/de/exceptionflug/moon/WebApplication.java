@@ -23,14 +23,13 @@ public class WebApplication {
 
     public static final String VERSION = "v1.0.0";
 
-    private static final PageHandler DEFAULT_HANDLER = new DefaultPageHandler();
-
     private final Map<String, PageHandler> pageHandlerMap = new HashMap<>();
     private final Map<String, HttpContext> contextMap = new HashMap<>();
     private final FrontendHttpHandler httpHandler = new FrontendHttpHandler(this);
     private final File htmlRoot;
     private final String rootPath;
     private final HttpServer server;
+    private PageHandler defaultPageHandler = new DefaultPageHandler();
 
     public WebApplication(final HttpServer server, final String rootPath, final File htmlRoot) {
         Preconditions.checkNotNull(server, "The server cannot be null");
@@ -75,8 +74,16 @@ public class WebApplication {
         }
     }
 
+    public void setDefaultPageHandler(final PageHandler defaultPageHandler) {
+        this.defaultPageHandler = defaultPageHandler;
+    }
+
+    public PageHandler getDefaultPageHandler() {
+        return defaultPageHandler;
+    }
+
     public PageHandler getPageHandler(final URI requestUri) {
-        return pageHandlerMap.getOrDefault(requestUri.getPath(), DEFAULT_HANDLER);
+        return pageHandlerMap.getOrDefault(requestUri.getPath(), defaultPageHandler);
     }
 
     public void registerPageHandler(final String path, final PageHandler pageHandler) {
