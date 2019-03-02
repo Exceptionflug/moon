@@ -7,6 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public interface PageHandler<T extends AbstractResponse> {
 
-    AbstractResponse handle(final T response, final Request request);
+    AbstractResponse handle(final T response, final Request request) throws Exception;
 
 }

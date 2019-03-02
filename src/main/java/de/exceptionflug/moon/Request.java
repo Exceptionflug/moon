@@ -21,18 +21,16 @@ public class Request {
 
     public void rewriteLocation(String target) throws IOException {
         rewriteLoc(target);
-        httpExchange.sendResponseHeaders(302,0);
+        httpExchange.sendResponseHeaders(302, 0);
         httpExchange.close();
     }
 
-    public void rewriteLocationAndQuery(String target, final String query) throws IOException {
+    public void rewriteLocationAndQuery(String target, final String query) throws Exception {
         if (target.startsWith("/")) {
-            try {
-                final URI uri = new URIBuilder(httpExchange.getRequestURI()).setPath(target).setCustomQuery(query).build();
-                target = uri.toASCIIString();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
+            final URI uri = new URIBuilder(httpExchange.getRequestURI()).setPath(target).setCustomQuery(query).build();
+            target = uri.toASCIIString();
+        } else {
+            target = new URIBuilder(target).setCustomQuery(query).build().toASCIIString();
         }
         httpExchange.getResponseHeaders().add("Location", target);
         httpExchange.sendResponseHeaders(302, 0);
@@ -42,12 +40,12 @@ public class Request {
     public void rewriteLocationAndWriteCookies(String target, final Cookies cookies) throws IOException {
         rewriteLoc(target);
         cookies.setCookies(httpExchange.getResponseHeaders());
-        httpExchange.sendResponseHeaders(302,0);
+        httpExchange.sendResponseHeaders(302, 0);
         httpExchange.close();
     }
 
     private void rewriteLoc(String target) {
-        if(target.startsWith("/")) {
+        if (target.startsWith("/")) {
             try {
                 final URI uri = new URIBuilder(httpExchange.getRequestURI()).setPath(target).build();
                 target = uri.toASCIIString();
