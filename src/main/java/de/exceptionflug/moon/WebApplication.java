@@ -31,12 +31,13 @@ public class WebApplication {
     private final HttpServer server;
     private PageHandler defaultPageHandler = new DefaultPageHandler();
 
+    public WebApplication(final HttpServer server, final String rootPath) {
+        this(server, rootPath, null);
+    }
+
     public WebApplication(final HttpServer server, final String rootPath, final File htmlRoot) {
         Preconditions.checkNotNull(server, "The server cannot be null");
         Preconditions.checkNotNull(rootPath, "The root path cannot be null");
-        Preconditions.checkNotNull(htmlRoot, "The htmlRoot cannot be null");
-        Preconditions.checkState(htmlRoot.exists(), "The specified html root directory does not exist");
-        Preconditions.checkState(htmlRoot.isDirectory(), "The specified html root directory is a file");
         this.htmlRoot = htmlRoot;
         this.rootPath = rootPath;
         this.server = server;
@@ -52,6 +53,8 @@ public class WebApplication {
     }
 
     public AbstractResponse getResponse(final URI requestUri) throws IOException {
+        if(htmlRoot == null)
+            return new NotFoundResponse(requestUri);
         final File requested = new File(htmlRoot, requestUri.getPath().replaceFirst("("+rootPath+"/)|("+rootPath+")\\b", ""));
         if(!requested.exists())
             return new NotFoundResponse(requestUri);
@@ -110,6 +113,12 @@ public class WebApplication {
         final HttpServer server = HttpServer.create(address, backlog);
         server.start();
         return new WebApplication(server, rootPath, htmlRoot);
+    }
+
+    public static WebApplication quickStart(final InetSocketAddress address, final int backlog, final String rootPath) throws IOException {
+        final HttpServer server = HttpServer.create(address, backlog);
+        server.start();
+        return new WebApplication(server, rootPath);
     }
 
 }
