@@ -69,7 +69,7 @@ public class WebApplication {
             return new BinaryResponse(Files.readAllBytes(requestedPath), mimeType);
         } else {
             final String[] split = mimeType.split("/");
-            if(split[0].equals("text") || mimeType.equals("application/javascript") || mimeType.equals("application/json") || mimeType.equals("application/xml")) {
+            if(split[0].equals("text") || mimeType.equals("application/javascript") || mimeType.equals("application/response") || mimeType.equals("application/xml")) {
                 return new TextResponse(Joiner.on("\n").join(Files.readAllLines(requestedPath)), mimeType);
             } else {
                 return new BinaryResponse(Files.readAllBytes(requestedPath), mimeType);
