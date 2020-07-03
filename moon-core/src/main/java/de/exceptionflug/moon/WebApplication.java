@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class WebApplication {
 
-    public static final String VERSION = "v1.0.0";
+    public static final String VERSION = "v1.0.1";
 
     private final Map<String, PageHandler> pageHandlerMap = new HashMap<>();
     private final Map<String, HttpContext> contextMap = new HashMap<>();
