@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 public class WebApplication {
 
@@ -41,6 +42,7 @@ public class WebApplication {
         this.htmlRoot = htmlRoot;
         this.rootPath = rootPath;
         this.server = server;
+        server.setExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         contextMap.put(rootPath, server.createContext(rootPath, httpHandler));
     }
 
