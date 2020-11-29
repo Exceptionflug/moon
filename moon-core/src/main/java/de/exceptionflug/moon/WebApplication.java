@@ -42,7 +42,6 @@ public class WebApplication {
         this.htmlRoot = htmlRoot;
         this.rootPath = rootPath;
         this.server = server;
-        server.setExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         contextMap.put(rootPath, server.createContext(rootPath, httpHandler));
     }
 
@@ -113,12 +112,14 @@ public class WebApplication {
 
     public static WebApplication quickStart(final InetSocketAddress address, final int backlog, final String rootPath, final File htmlRoot) throws IOException {
         final HttpServer server = HttpServer.create(address, backlog);
+        server.setExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         server.start();
         return new WebApplication(server, rootPath, htmlRoot);
     }
 
     public static WebApplication quickStart(final InetSocketAddress address, final int backlog, final String rootPath) throws IOException {
         final HttpServer server = HttpServer.create(address, backlog);
+        server.setExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         server.start();
         return new WebApplication(server, rootPath);
     }
