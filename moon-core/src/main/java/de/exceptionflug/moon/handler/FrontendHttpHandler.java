@@ -40,8 +40,7 @@ public class FrontendHttpHandler extends FormDataHandler {
                 final URI build = new URIBuilder(requestURI).setPath(requestURI.getPath() + "/index.html").build();
                 final AbstractResponse index = webApplication.getResponse(build);
                 if(!(index instanceof NotFoundResponse)) {
-                    new Request(httpExchange, cookies, null).rewriteLocation(build.toASCIIString());
-                    return;
+                    response = index;
                 }
             } catch (final URISyntaxException e) {
             } // Won't happen
