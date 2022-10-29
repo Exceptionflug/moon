@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 
 public class WebApplication {
 
-    public static final String VERSION = "v1.0.1";
+    public static final String VERSION = "v1.0.2";
 
     private final Map<String, PageHandler> pageHandlerMap = new HashMap<>();
     private final Map<String, HttpContext> contextMap = new HashMap<>();
@@ -54,23 +54,23 @@ public class WebApplication {
     }
 
     public AbstractResponse getResponse(final URI requestUri) throws IOException {
-        if(htmlRoot == null)
+        if (htmlRoot == null)
             return new NotFoundResponse(requestUri);
-        final File requested = new File(htmlRoot, requestUri.getPath().replaceFirst("("+rootPath+"/)|("+rootPath+")\\b", ""));
-        if(!requested.exists())
+        final File requested = new File(htmlRoot, requestUri.getPath().replaceFirst("(" + rootPath + "/)|(" + rootPath + ")\\b", ""));
+        if (!requested.exists())
             return new NotFoundResponse(requestUri);
         final Path requestedPath = requested.toPath();
         final String mimeType = Files.probeContentType(requestedPath);
-        if(requested.isDirectory()) {
+        if (requested.isDirectory()) {
             return new DirectoryResponse(requested, requestUri);
         }
-        if(mimeType == null)
+        if (mimeType == null)
             return new BinaryResponse(Files.readAllBytes(requestedPath), null);
-        if(!mimeType.contains("/")) {
+        if (!mimeType.contains("/")) {
             return new BinaryResponse(Files.readAllBytes(requestedPath), mimeType);
         } else {
             final String[] split = mimeType.split("/");
-            if(split[0].equals("text") || mimeType.equals("application/javascript") || mimeType.equals("application/response") || mimeType.equals("application/xml")) {
+            if (split[0].equals("text") || mimeType.equals("application/javascript") || mimeType.equals("application/response") || mimeType.equals("application/xml")) {
                 return new TextResponse(Joiner.on("\n").join(Files.readAllLines(requestedPath)), mimeType);
             } else {
                 return new BinaryResponse(Files.readAllBytes(requestedPath), mimeType);
@@ -87,15 +87,20 @@ public class WebApplication {
     }
 
     public PageHandler getPageHandler(final URI requestUri) {
+        for (String path : pageHandlerMap.keySet()) {
+            if (requestUri.getPath().matches(path)) {
+                return pageHandlerMap.get(path);
+            }
+        }
         return pageHandlerMap.getOrDefault(requestUri.getPath(), defaultPageHandler);
     }
 
     public void registerPageHandler(final String path, final PageHandler pageHandler) {
-        pageHandlerMap.put(concatPath(rootPath, path), pageHandler);
+        pageHandlerMap.put(createRegexFromGlob(concatPath(rootPath, path)), pageHandler);
     }
 
     public void removePageHandler(final String path) {
-        pageHandlerMap.remove(concatPath(rootPath, path));
+        pageHandlerMap.remove(createRegexFromGlob(concatPath(rootPath, path)));
     }
 
     public void protect(final String path, final Authenticator authenticator) {
@@ -103,9 +108,34 @@ public class WebApplication {
     }
 
     private String concatPath(final String path, final String path2) {
-        if(path.endsWith("/"))
-            return path+path2;
-        else return path+"/"+path2;
+        if (path.endsWith("/"))
+            return path + path2;
+        else return path + "/" + path2;
+    }
+
+    private String createRegexFromGlob(String glob) {
+        StringBuilder out = new StringBuilder("^");
+        for (int i = 0; i < glob.length(); ++i) {
+            final char c = glob.charAt(i);
+            switch (c) {
+                case '*':
+                    out.append(".*");
+                    break;
+                case '?':
+                    out.append('.');
+                    break;
+                case '.':
+                    out.append("\\.");
+                    break;
+                case '\\':
+                    out.append("\\\\");
+                    break;
+                default:
+                    out.append(c);
+            }
+        }
+        out.append('$');
+        return out.toString();
     }
 
     // <------------------------------------------>
